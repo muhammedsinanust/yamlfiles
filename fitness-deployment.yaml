@@ -52,43 +52,45 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fitness-deployment
+  name: fitness-tracker-app
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      app: fitness
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
+      app: fitness-tracker-app
   template:
     metadata:
       labels:
-        app: fitness
+        app: fitness-tracker-app
+      annotations:
+        ad.datadoghq.com/fitness-tracker-app.logs: >-
+          [{"source":"nodejs","service":"fitness-tracker-service"},
+           {"source":"nodejs","service":"fitness-tracker-app"}]
     spec:
       containers:
-        - name: fitness
-          image: muralisocial123/fitness-app:v1.0.1
-          ports:
-            - containerPort: 5000
-          resources:
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
-            requests:
-              memory: "256Mi"
-              cpu: "250m"
+      - name: fitness-tracker-app
+        image: pulkit197/fitness_tracker-master-copy3-fitness-app:latest
+        ports:
+        - containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: fitness-configmap
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: fitness-service
+  name: fitness-tracker-service
 spec:
   selector:
-    app: fitness
+    app: fitness-tracker-app
   ports:
-    - port: 5000
-      targetPort: 5000
+  - port: 80
+    targetPort: 5000
   type: ClusterIP

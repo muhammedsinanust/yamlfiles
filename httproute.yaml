@@ -11,5 +11,5 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: fitness-service
-          port: 5000
+        - name: fitness-tracker-service
+          port: 80
